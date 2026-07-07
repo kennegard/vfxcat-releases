@@ -1,5 +1,7 @@
 #!/bin/sh
 # vfxcat installer — downloads the latest release binary for this machine.
+# SOURCE OF TRUTH lives here (private repo); the served copy is
+# kennegard/vfxcat-releases/install.sh — sync it after editing.
 #
 #   curl -fsSL https://raw.githubusercontent.com/kennegard/vfxcat-releases/main/install.sh | sh
 #
