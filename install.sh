@@ -9,9 +9,9 @@
 # without Gatekeeper prompts — this is the recommended install path.
 #
 # Overrides:
-#   VFXCAT_VERSION=v0.2.0   install a specific release (default: latest)
-#   VFXCAT_INSTALL_DIR=~/bin  install somewhere else (default: /usr/local/bin,
-#                             falling back to ~/.local/bin if not writable)
+#   VFXCAT_VERSION=v0.2.0     install a specific release (default: latest)
+#   VFXCAT_INSTALL_DIR=~/bin  install somewhere else (default: ~/.local/bin —
+#                             one predictable location, never needs sudo)
 set -eu
 
 REPO="kennegard/vfxcat-releases"
@@ -44,10 +44,7 @@ fi
 # Archive names come from .goreleaser.yaml: vfxcat_<version-without-v>_<os>_<arch>.tar.gz
 url="https://github.com/$REPO/releases/download/$version/vfxcat_${version#v}_${os}_${arch}.tar.gz"
 
-install_dir="${VFXCAT_INSTALL_DIR:-/usr/local/bin}"
-if [ ! -w "$install_dir" ] && [ -z "${VFXCAT_INSTALL_DIR:-}" ]; then
-  install_dir="$HOME/.local/bin"
-fi
+install_dir="${VFXCAT_INSTALL_DIR:-$HOME/.local/bin}"
 mkdir -p "$install_dir"
 
 echo "Installing vfxcat $version ($os/$arch) to $install_dir"
@@ -63,7 +60,28 @@ echo
 echo "Installed: $install_dir/vfxcat"
 case ":$PATH:" in
   *":$install_dir:"*) ;;
-  *) echo "note: $install_dir is not on your PATH" ;;
+  *)
+    # Piped installs can't prompt (stdin is the script), so give exact
+    # copy-paste steps instead of a bare warning.
+    case "${SHELL:-}" in
+      */zsh)  rc="$HOME/.zshrc" ;;
+      */bash) rc="$HOME/.bashrc" ;;
+      *)      rc="your shell profile" ;;
+    esac
+    echo
+    echo "$install_dir is not on your PATH, so 'vfxcat' won't be found yet."
+    echo "To fix, run:"
+    echo
+    if [ "$rc" = "your shell profile" ]; then
+      echo "  add 'export PATH=\"$install_dir:\$PATH\"' to $rc"
+    else
+      echo "  echo 'export PATH=\"$install_dir:\$PATH\"' >> $rc"
+    fi
+    echo
+    echo "then open a new terminal. Until then, run it via the full path:"
+    echo
+    echo "  $install_dir/vfxcat"
+    ;;
 esac
 echo
 echo "Optional tools unlock previews (vfxcat runs without them):"
