@@ -84,7 +84,13 @@ case ":$PATH:" in
     ;;
 esac
 echo
+echo "Before first run: vfxcat needs the vfxcat.license from your beta welcome"
+echo "email. Put it at ./data/vfxcat.license relative to where you'll run"
+echo "'vfxcat serve' (or pass --license /path/to/vfxcat.license)."
+echo
 echo "Optional tools unlock previews (vfxcat runs without them):"
-echo "  macOS:  brew install ffmpeg openimageio"
-echo "  Debian: sudo apt install ffmpeg openimageio-tools"
-echo "Run 'vfxcat doctor' to see what's detected and what each tool unlocks."
+echo "  macOS:   brew install ffmpeg openimageio"
+echo "  Debian:  sudo apt install ffmpeg openimageio-tools"
+echo "  ARRIRAW: art-cmd from the free ARRI Reference Tool (arri.com), on PATH"
+echo "Run 'vfxcat doctor' to check the license, data dir, and port, and to see"
+echo "which tools are detected and what each one unlocks."
