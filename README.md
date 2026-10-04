@@ -37,12 +37,23 @@ sudo apt install ffmpeg openimageio-tools      # Debian/Ubuntu
 
 ## Quickstart
 
-Place the `vfxcat.license` file you received in `./data/` (or point at it
-with `--license`), then:
+Save the `vfxcat.license` file from your beta welcome email first (Downloads
+is fine). When the installer finishes it starts guided setup, which finds the
+license, asks which folders to catalog and who should be able to open the
+catalog, then starts vfxcat and opens it in your browser, signed in. On a Mac
+it can also start vfxcat automatically when you log in.
+
+Afterwards:
 
 ```sh
-vfxcat serve --root /path/to/footage --port 8080
+vfxcat          # status and a menu: open, start, share the sign-in link, change settings
+vfxcat setup    # change settings
+vfxcat doctor   # check the license, data folder, port and preview tools
 ```
+
+Prefer flags? `vfxcat serve --root /path/to/footage --license /path/to/vfxcat.license`
+does the same by hand, and setup prints the exact command for your settings
+when it finishes.
 
 ## License
 
