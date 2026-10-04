@@ -12,6 +12,7 @@
 #   VFXCAT_VERSION=v0.2.0     install a specific release (default: latest)
 #   VFXCAT_INSTALL_DIR=~/bin  install somewhere else (default: ~/.local/bin —
 #                             one predictable location, never needs sudo)
+#   VFXCAT_NO_SETUP=1         don't start guided setup after a fresh install
 set -eu
 
 REPO="kennegard/vfxcat-releases"
@@ -46,6 +47,10 @@ url="https://github.com/$REPO/releases/download/$version/vfxcat_${version#v}_${o
 
 install_dir="${VFXCAT_INSTALL_DIR:-$HOME/.local/bin}"
 mkdir -p "$install_dir"
+# An existing binary means this is an upgrade: don't walk the user through
+# setup again, just say how to get to status and settings.
+upgrade=0
+[ -x "$install_dir/vfxcat" ] && upgrade=1
 
 echo "Installing vfxcat $version ($os/$arch) to $install_dir"
 tmp=$(mktemp -d)
@@ -84,13 +89,28 @@ case ":$PATH:" in
     ;;
 esac
 echo
-echo "Before first run: vfxcat needs the vfxcat.license from your beta welcome"
-echo "email. Put it at ./data/vfxcat.license relative to where you'll run"
-echo "'vfxcat serve' (or pass --license /path/to/vfxcat.license)."
-echo
 echo "Optional tools unlock previews (vfxcat runs without them):"
 echo "  macOS:   brew install ffmpeg openimageio"
 echo "  Debian:  sudo apt install ffmpeg openimageio-tools"
 echo "  ARRIRAW: art-cmd from the free ARRI Reference Tool (arri.com), on PATH"
-echo "Run 'vfxcat doctor' to check the license, data dir, and port, and to see"
-echo "which tools are detected and what each one unlocks."
+echo "'vfxcat doctor' shows which are detected and what each one unlocks."
+echo
+
+if [ "$upgrade" = 1 ]; then
+  echo "Updated. Run 'vfxcat' for status, or 'vfxcat setup' to change settings."
+  echo "If vfxcat runs as a login service, restart it to use the new version:"
+  echo "  vfxcat service stop && vfxcat service start"
+elif [ -z "${VFXCAT_NO_SETUP:-}" ] && [ -t 1 ] && (exec </dev/tty) 2>/dev/null \
+  && "$install_dir/vfxcat" help 2>&1 | grep -q 'vfxcat setup'; then
+  # Under 'curl | sh' this script's stdin is the script itself, so setup
+  # reads the keyboard from /dev/tty. The help check keeps this script safe
+  # to publish ahead of a release: a binary without setup (older release, or
+  # VFXCAT_VERSION pinned to one) just gets the hint below. Setup needs your license file from the
+  # welcome email; it looks in Downloads, Desktop and Documents for it.
+  echo "Starting guided setup (Ctrl-C to skip — run 'vfxcat setup' any time)..."
+  echo
+  "$install_dir/vfxcat" setup </dev/tty || :
+else
+  echo "Run 'vfxcat setup' to get started — it finds your license, asks a few"
+  echo "plain questions, and opens the catalog in your browser."
+fi
